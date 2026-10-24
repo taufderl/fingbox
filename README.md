@@ -3,8 +3,9 @@
 This repo holds everything needed to replace the stock Fing firmware on a **Fingbox (FIN-B-001)**
 with our own mainline Linux (Debian/Armbian or Alpine) on its internal eMMC.
 
-> Status: **pre-probing.** The hardware is identified from a public teardown but
-> nothing here has been verified on our unit yet. Record every observation in
+> Status: **probing.** The UART console works and the first stock boot log is captured.
+> The stock box runs a mainline-based U-Boot 2017.01 (Orange Pi Plus 2E config, 2 s
+> interruptible autoboot) and Ubuntu Core 16 built by Domotz. See
 > [`docs/findings.md`](docs/findings.md).
 
 ## Hardware at a glance

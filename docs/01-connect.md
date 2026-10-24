@@ -11,8 +11,19 @@ board (both sides) and put them in `captures/photos/`. We need them to identify 
 
 ## UART console
 
-The 3-pin header is already fitted. The pins are labelled on the silkscreen; write the labels down in
-`findings.md`.
+The 3-pin header is already fitted, bottom left on the component side, next to a
+brass mounting hole ([teardown photo](https://goughlui.com/wp-content/uploads/2018/06/2018060815002653.jpg)).
+The pitch is narrower than 2.54 mm, so remove the plastic housings from Dupont
+plugs or solder wires to the joints on the back.
+
+Pin order confirmed on our unit (see `findings.md`):
+
+```
+(mounting hole)  [GND]  [TX]  [RX]
+                        middle outer
+```
+
+The silkscreen labels are rotated and easy to misread. If you see nothing, swap TX and RX.
 
 **Use a 3.3 V adapter. Never connect the adapter's VCC pin.** The board is
 powered by its own micro-USB supply.
