@@ -25,6 +25,9 @@ capture in `captures/`.
 | 2026-10-24 | U-Boot cmds | **No `ums`, `fastboot` or `dfu`.** Present: `usb`, `usbboot`, `sysboot` (extlinux), `bootz`, `bootefi`, `dhcp`/`tftpboot`/`pxe`/`nfs`, `mmc`, `part`, `fatls/fatload/fatwrite`, `ext4ls/ext4load`, `i2c`, `gpio`, `fdt`, `md`/`mw`, `loadx/loady` | same |
 | 2026-10-24 | U-Boot env | Distro boot: `boot_targets=fel mmc0 mmc1 usb0 pxe dhcp`, `boot_scripts=boot.scr.uimg boot.scr`, `boot_prefixes=/ /boot/`, extlinux and EFI supported. `fdtfile=sun8i-h3-domotz-fingbox-v2.dtb`, `bootdelay=2`. Snappy A/B via `snap_mode`/`snap_try_*` with `saveenv` to `uboot.env` on FAT p1. `ethaddr` set in env. `serial#` is a device ID (not recorded here) | same |
 
+| 2026-10-24 | eMMC (U-Boot) | `mmc list`: `SD/MMC: 1`, `SD/MMC: 0 (eMMC)` → **eMMC = `mmc 0`** in stock U-Boot. MMC 5.0, mfr 0x15 (Samsung), name `8WPD3`, 8-bit, 52 MHz, user 7.3 GiB, boot partitions 4 MiB, RPMB 512 KiB | `uart-20261024-164216.log` |
+| 2026-10-24 | Partitions | DOS table. p1 FAT (0x0c, bootable) start 524288 (256 MiB), 262144 sectors (128 MiB). p2 Linux start 786432, 3145728 sectors (1.5 GiB, purpose TBD). p3 Linux (`writable`) start 3932160, 11337372 sectors (~5.4 GiB). **First 256 MiB unpartitioned**: SPL at 8 KiB + U-Boot | same |
+
 Note on the DTB name: `sun8i-h3-domotz-fingbox-v2` suggests this unit is a
 **Fingbox v2** hardware revision, or that Domotz versioned the DT. Check the label
 on the case.
