@@ -1,0 +1,5 @@
+echo "Fingbox: booting OpenWrt with the stock U-Boot"
+setenv bootargs console=ttyS0,115200 root=PARTUUID=5452574f-02 rootwait
+load mmc 0:1 0x46000000 zImage
+load mmc 0:1 0x48000000 fingbox.dtb
+bootz 0x46000000 - 0x48000000

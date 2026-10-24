@@ -33,6 +33,15 @@ capture in `captures/`.
 | 2026-10-24 | USB stick | The 7.4 GB Phison stick shows `critical medium error` near its end, so it isn't trusted for data | same |
 | 2026-10-24 | **Backup** | Full eMMC user area pulled over ssh: `captures/fingbox-emmc-20261024.img`, 7818182656 bytes, sha256 `9c329c2b51302a1bf0626fa12b435462773dd8fa4507062738cf71ac89d446ae`, **identical to `sha256sum /dev/mmcblk2` on the device**. `boot0`/`boot1` are all zeros (unused) | user terminal |
 
+| 2026-10-24 | FEL / micro-USB | Holding UBOOT while powering via micro-USB keeps the console silent (boot ROM in FEL), but **the PC never sees a USB device** with 3 different cables, on a hub and directly on the laptop. The micro-USB port on this unit is power-only, so **FEL recovery is not available**. Plugging in briefly resets a shared USB hub (inrush) | user |
+| 2026-10-24 | Buttons | Not yet verified: no button press observed during a 60 s GPIO watch on PL0–PL11 | btnwatch |
+
+| 2026-10-24 | Stock U-Boot | **No FIT support** (`iminfo`: "Unknown image format"), but `bootz` + separate DTB, `tftpboot`, `load usb`, `fatwrite` work. Env file `uboot.env` on FAT p1 uses the **redundant format** (CRC + flags byte, 131072 bytes). Stock bootloader occupies 8–456 KiB of the eMMC; raw stock data (recovery?) also at 2–145 MiB outside partitions | `uart-20261024-222359.log`, backup scan |
+| 2026-10-24 | Buttons | Internal **RESET = hardware SoC reset** (no kernel message). External pin-hole button and internal POWER: registered as gpio-keys PL4/PL0, not yet confirmed | serial log |
+| 2026-10-24 | LEDs | Ring LEDs 1→6 run **clockwise**; all 18 channels + PL10 white + PA15 green work under OpenWrt (colour order per LED not confirmed) | user |
+| 2026-10-24 | **OpenWrt** | main @ b5bc4becb4 + fork `taufderl/openwrt:fingbox`, kernel 6.18.55, installed on eMMC **keeping the stock U-Boot** (zImage + DTB + bootz `boot.scr` + `uboot.env` in p1). Ethernet, Wi-Fi (AR9271 with calibration file, MACs from 24C02), LEDs, Tailscale 1.104.1 and LuCI verified; survives reboot | ssh |
+| 2026-10-24 | Wi-Fi radio path | USB bus number of the AR9271 changes between boots (`usb3` vs `usb2`), so OpenWrt's path-based radio config breaks after reboot. Workaround: `wireless.radio0.phy='phy0'` instead of `path` | ssh |
+
 Note on the DTB name: `sun8i-h3-domotz-fingbox-v2` suggests this unit is a
 **Fingbox v2** hardware revision, or that Domotz versioned the DT. Check the label
 on the case.
