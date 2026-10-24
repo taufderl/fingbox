@@ -43,6 +43,8 @@ capture in `captures/`.
 | 2026-10-24 | **OpenWrt** | main @ b5bc4becb4 + fork `taufderl/openwrt:fingbox`, kernel 6.18.55, installed on eMMC **keeping the stock U-Boot** (zImage + DTB + bootz `boot.scr` + `uboot.env` in p1). Ethernet, Wi-Fi (AR9271 with calibration file, MACs from 24C02), LEDs, Tailscale 1.104.1 and LuCI verified; survives reboot | ssh |
 | 2026-10-24 | Wi-Fi radio path | USB bus number of the AR9271 changes between boots (`usb3` vs `usb2`), so OpenWrt's path-based radio config breaks after reboot. Workaround: `wireless.radio0.phy='phy0'` instead of `path` | ssh |
 
+| 2026-10-24 | Wi-Fi AP | AP + STA concurrently on phy0 (same channel as the upstream AP). WPA2 client (Pixel) associated at −40 dBm, 72.2 Mbit/s MCS7 SGI both ways, DHCP lease from br-lan, internet via the Fingbox works | logread, iw |
+
 Note on the DTB name: `sun8i-h3-domotz-fingbox-v2` suggests this unit is a
 **Fingbox v2** hardware revision, or that Domotz versioned the DT. Check the label
 on the case.
