@@ -1,77 +1,88 @@
-# fingbox: mainline Linux on the Fingbox
+# fingbox: OpenWrt on the Fingbox
 
-This repo holds everything needed to replace the stock Fing firmware on a **Fingbox (FIN-B-001)**
-with our own mainline Linux (Debian/Armbian or Alpine) on its internal eMMC.
+The **Fingbox** (Fing / Domotz network monitoring appliance) is an Allwinner H3
+board with 1 GiB RAM, 8 GB eMMC, gigabit Ethernet and an AR9271 Wi-Fi chip. Its
+cloud service is history, its stock firmware (Ubuntu Core 16, kernel 4.9) no longer
+gets updates. This repo documents how to replace it with current **OpenWrt** and
+keeps the tooling and notes from the bring-up.
 
-> Status: **probing.** The UART console works and the first stock boot log is captured.
-> The stock box runs a mainline-based U-Boot 2017.01 (Orange Pi Plus 2E config, 2 s
-> interruptible autoboot) and Ubuntu Core 16 built by Domotz. See
-> [`docs/findings.md`](docs/findings.md).
+> Status: **OpenWrt (main, kernel 6.18) runs from eMMC** on a real unit, booted
+> by the untouched vendor U-Boot. Ethernet, Wi-Fi client and access point, the
+> RGB LED ring, the reset button, Tailscale and LuCI work.
+> Device support lives in a fork of OpenWrt and is being prepared for upstream.
 
-## Hardware at a glance
+## Hardware (verified on a unit)
 
-| Part        | Value (source: teardown, unverified on our unit) |
-|-------------|--------------------------------------------------|
-| SoC         | Allwinner H3 (sun8i), 4× Cortex-A7, Mali-400 MP2 |
-| RAM         | 2× Samsung K4B4G1646E DDR3 → 1 GiB               |
-| Storage     | Samsung KLM8G… eMMC (KLM8G = 8 GB class; teardown says 1 GiB, so verify) |
-| SD slot     | footprint present, **not populated**             |
-| Ethernet    | Realtek RTL8211E gigabit PHY (H3 EMAC, RGMII)    |
-| Wi-Fi       | Atheros AR9271 USB 802.11n (`ath9k_htc`)         |
-| LEDs        | NXP PCA9635 I2C LED driver → logo ring           |
-| EEPROM      | Atmel 24C02 (2 Kbit, I2C)                        |
-| Buttons     | Power, Reset, **Uboot** (likely FEL), Recovery   |
-| Debug       | 3-pin UART header (GND/TX/RX, 3.3 V)             |
-| Power       | micro-USB 5 V / 2 A (possibly also USB-OTG → FEL)|
+| Part | Details |
+|---|---|
+| SoC | Allwinner H3, 4× Cortex-A7 |
+| RAM | 1 GiB DDR3 (2× Samsung K4B4G1646E) |
+| Storage | 8 GB Samsung eMMC (7.28 GiB), no SD socket (footprint only) |
+| Ethernet | RTL8211E gigabit PHY on the H3 EMAC |
+| Wi-Fi | AR9271 (USB, 2.4 GHz, 1×1), **no EEPROM**: calibration data comes from the stock firmware |
+| EEPROM | 24C02 on I2C1, holds the Ethernet and Wi-Fi MAC addresses |
+| LEDs | RGB ring of 6 LEDs (PCA9633 + PCA9635 on I2C1), white and green LED on the board |
+| Buttons | pin-hole "Reset" on the case (PL4); board buttons RESET (resets the SoC), POWER (not on a GPIO), UBOOT |
+| Serial | 3-pin header next to a mounting hole: GND, TX (middle), RX; 115200 8N1, 3.3 V |
+| USB | USB-A host port; micro-USB is **power only** (no FEL) |
+| Bootloader | vendor U-Boot 2017.01 (Orange Pi Plus 2E config), no FIT support, `bootz`, distro boot, TFTP |
 
-Closest mainline reference boards: **FriendlyElec NanoPi M1 Plus**
-(H3 + RTL8211E + eMMC + 1 GiB) and **Orange Pi Plus 2E**. See
-[`docs/00-hardware.md`](docs/00-hardware.md).
+Details and sources for every line: [`docs/findings.md`](docs/findings.md).
 
-## Plan
+## Installing OpenWrt
 
-1. **Connect:** UART console + FEL over USB → [`docs/01-connect.md`](docs/01-connect.md)
-2. **Probe:** capture stock boot log, U-Boot env, partitions, I2C/GPIO map → [`docs/02-probing.md`](docs/02-probing.md)
-3. **Back up:** full eMMC image before touching anything → [`docs/03-backup.md`](docs/03-backup.md)
-4. **Build:** mainline U-Boot + kernel + `sun8i-h3-fingbox.dts` → [`docs/04-build.md`](docs/04-build.md)
-5. **Flash:** write image to eMMC via FEL + U-Boot `ums` → [`docs/05-flashing.md`](docs/05-flashing.md)
+Because the micro-USB port has no data lines, FEL recovery is not available and
+there is no SD socket. The install therefore **never replaces the vendor U-Boot**:
 
-The device stays recoverable as long as FEL works. The H3 boot ROM falls back to
-FEL when it finds no bootable SPL, and the Uboot/FEL button forces it.
+1. Open the case and attach a 3.3 V serial adapter to the header.
+2. Interrupt U-Boot (press a key within 2 s) and boot the OpenWrt initramfs over
+   TFTP: `tftpboot 0x46000000 <initramfs>; bootz 0x46000000`.
+3. In the running OpenWrt, `sysupgrade` the sdcard image. The Fingbox upgrade
+   code writes only the partition table and partitions, never 8 KiB–1 MiB.
+4. Copy the Wi-Fi calibration file from your own stock firmware (see below).
 
-## Layout
+The full walk-through, including making a complete eMMC backup first, is in
+[`docs/07-openwrt.md`](docs/07-openwrt.md).
+
+### Wi-Fi calibration data
+
+The AR9271 has no EEPROM. Domotz shipped its calibration data as
+`eeprom_ar9271.bin` in the stock kernel snap. That file is not redistributed
+here. Extract it from your own unit's backup and place it at
+`/lib/firmware/ath9k_htc/fingbox-eeprom.bin`, then add that path to
+`/etc/sysupgrade.conf` so it survives updates.
+
+## Repository layout
 
 ```
-docs/       step-by-step guides + findings log
-scripts/    helper scripts (serial capture, FEL checks, backup, flash)
-dts/        device tree for the Fingbox (written after probing)
-captures/   raw logs/dumps from our unit (images are git-ignored)
+docs/       bring-up notes in the order they were written, plus findings.md
+openwrt/    OpenWrt build config and the stock-U-Boot install helpers
+docker/     container with the OpenWrt build dependencies
+scripts/    serial capture, backup, flash and build helpers
+captures/   local only: logs, dumps and stock files are never committed
 ```
 
-## Shopping list
+The early notes (`docs/00`–`05`) assumed FEL recovery over micro-USB. That turned
+out to be wrong for this hardware; `findings.md` has the verified state.
 
-- 3.3 V USB-UART adapter (CP2102/FT232/CH340). It **must be 3.3 V, not 5 V**.
-- 3 Dupont jumper wires (the header is already fitted)
-- micro-USB **data** cable (for FEL/ums), plus a separate 5 V supply if the
-  micro-USB port turns out to be power-only
-- Host tools: `tio` or `picocom`, `sunxi-tools` (`sunxi-fel`), `dtc`,
-  `arm-linux-gnueabihf` cross toolchain, `swig`, `python3-dev`, `bison`, `flex`
+## Related work
 
-## Corrections to the Gemini summary
+- OpenWrt fork with the device support: <https://github.com/taufderl/openwrt> (branch `fingbox`)
+- kuba2k2's Alpine/Buildroot port for the Fingbox v1, which documented the LED
+  controllers and the Wi-Fi EEPROM problem first:
+  <https://github.com/kuba2k2/alpine-custom-setup/tree/master/board/h3-fingbox-v1>
+- Teardown with board photos by Gough Lui (2018):
+  <https://goughlui.com/2018/06/21/mega-review-fingbox-network-security-and-troubleshooting-device/>
 
-What the public sources actually say, compared with the chatbot summary we started from:
+## Disclaimer
 
-- The header is **3-pin** (GND/TX/RX) and already fitted, not "4-pin unpopulated".
-- The stock OS is Ubuntu. An nmap scan showed OpenSSH `7.2p2 Ubuntu-4ubuntu2.2`,
-  which is Ubuntu 16.04. "Ubuntu Core / snaps" is a guess, not confirmed.
-- **SSH was seen open** on the LAN in that review, so "zero open inbound
-  ports" is not accurate for at least some firmware versions.
-- Luca Bongiorni did use the Fingbox UART in his *Focaccia-Board* write-up. The
-  exact `init=/bin/sh` procedure is not confirmed, so verify it on our unit.
-- The Fingbox v2 hardware has not been checked. This repo targets FIN-B-001.
+Not affiliated with Fing or Domotz. Opening the case voids whatever warranty is
+left, and writing to the eMMC can brick the device. No Fing or Domotz software
+is included in this repository.
 
-Sources:
-[Gough Lui teardown (2018)](https://goughlui.com/2018/06/21/mega-review-fingbox-network-security-and-troubleshooting-device/) ·
-[Bongiorni: Focaccia-Board](https://lucabongiorni.medium.com/hacking-iot-devices-with-focaccia-board-8c4e009ed488) ·
-[The Gadgeteer review](https://the-gadgeteer.com/2017/12/19/fingbox-review/) ·
-[linux-sunxi H3](https://linux-sunxi.org/H3) · [linux-sunxi FEL](https://linux-sunxi.org/FEL)
+Parts of this work were done with the help of an AI coding assistant (Claude);
+every change was reviewed and tested on hardware.
+
+## License
+
+[MIT](LICENSE)
