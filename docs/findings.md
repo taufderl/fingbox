@@ -28,6 +28,11 @@ capture in `captures/`.
 | 2026-10-24 | eMMC (U-Boot) | `mmc list`: `SD/MMC: 1`, `SD/MMC: 0 (eMMC)` → **eMMC = `mmc 0`** in stock U-Boot. MMC 5.0, mfr 0x15 (Samsung), name `8WPD3`, 8-bit, 52 MHz, user 7.3 GiB, boot partitions 4 MiB, RPMB 512 KiB | `uart-20261024-164216.log` |
 | 2026-10-24 | Partitions | DOS table. p1 FAT (0x0c, bootable) start 524288 (256 MiB), 262144 sectors (128 MiB). p2 Linux start 786432, 3145728 sectors (1.5 GiB, purpose TBD). p3 Linux (`writable`) start 3932160, 11337372 sectors (~5.4 GiB). **First 256 MiB unpartitioned**: SPL at 8 KiB + U-Boot | same |
 
+| 2026-10-24 | USB boot | Stock U-Boot reads USB sticks on the USB-A port (`usb start`, `fatls usb 0:1`). **Armbian 26.11 (Orange Pi+ 2E, trixie, kernel 6.18.57) boots from USB** with the manual commands in `06-usb-boot.md`. U-Boot 2017.01 reads its ext4 (64bit, metadata_csum_seed) fine | `uart-20261024-170951.log` |
+| 2026-10-24 | Mainline Linux | DT model "Xunlong Orange Pi Plus 2E" works: eMMC = `mmcblk2` (+ `boot0`/`boot1`), 991 MiB RAM, AR9271 enumerates on USB bus 4, **Ethernet `end0` works** (dwmac-sun8i, external PHY at `mdio_mux-0.2:01`, Generic PHY driver, rgmii-id), MAC from SID equals stock MAC `f0:23:b9:…`. GPIOs in use: PA15 red LED, PD6 `gmac-3v3`, PL2 usb0-vbus, PL3 `sw4` key, PL10 green LED | same |
+| 2026-10-24 | USB stick | The 7.4 GB Phison stick shows `critical medium error` near its end, so it isn't trusted for data | same |
+| 2026-10-24 | **Backup** | Full eMMC user area pulled over ssh: `captures/fingbox-emmc-20261024.img`, 7818182656 bytes, sha256 `9c329c2b51302a1bf0626fa12b435462773dd8fa4507062738cf71ac89d446ae`, **identical to `sha256sum /dev/mmcblk2` on the device**. `boot0`/`boot1` are all zeros (unused) | user terminal |
+
 Note on the DTB name: `sun8i-h3-domotz-fingbox-v2` suggests this unit is a
 **Fingbox v2** hardware revision, or that Domotz versioned the DT. Check the label
 on the case.
