@@ -21,6 +21,10 @@ capture in `captures/`.
 | 2026-10-24 | Ethernet | `sun8i-emac 1c30000.ethernet`, "phy interface7" (RGMII), PHY regulator `gmac-3v3` | same |
 | 2026-10-24 | Regulators | DT has `reg_led-3v3`, `gmac-3v3`, `usb0-vbus`, `vcc3v0`, `vcc5v0` | same |
 
+| 2026-10-24 | U-Boot console | Interrupt works (press Enter during the 2 s countdown). Toolchain Linaro GCC 4.9-2016.02 | `uart-20261024-164216.log` |
+| 2026-10-24 | U-Boot cmds | **No `ums`, `fastboot` or `dfu`.** Present: `usb`, `usbboot`, `sysboot` (extlinux), `bootz`, `bootefi`, `dhcp`/`tftpboot`/`pxe`/`nfs`, `mmc`, `part`, `fatls/fatload/fatwrite`, `ext4ls/ext4load`, `i2c`, `gpio`, `fdt`, `md`/`mw`, `loadx/loady` | same |
+| 2026-10-24 | U-Boot env | Distro boot: `boot_targets=fel mmc0 mmc1 usb0 pxe dhcp`, `boot_scripts=boot.scr.uimg boot.scr`, `boot_prefixes=/ /boot/`, extlinux and EFI supported. `fdtfile=sun8i-h3-domotz-fingbox-v2.dtb`, `bootdelay=2`. Snappy A/B via `snap_mode`/`snap_try_*` with `saveenv` to `uboot.env` on FAT p1. `ethaddr` set in env. `serial#` is a device ID (not recorded here) | same |
+
 Note on the DTB name: `sun8i-h3-domotz-fingbox-v2` suggests this unit is a
 **Fingbox v2** hardware revision, or that Domotz versioned the DT. Check the label
 on the case.
