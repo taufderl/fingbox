@@ -6,6 +6,7 @@ set -euo pipefail
 
 if [[ ${1:-} == -h || $# -eq 0 ]]; then
   echo "usage: $0 <command...>   (OPENWRT_DIR defaults to ~/git/openwrt)"
+  echo "  EXTRA_FEEDS=\"name=/host/path ...\" mounts extra feeds at /feeds/<name>"
   exit 0
 fi
 
@@ -21,8 +22,13 @@ fi
 mkdir -p "$HOME/.cache/openwrt-ccache"
 tty=()
 [[ -t 0 ]] && tty=(-it)
+feeds=()
+for f in ${EXTRA_FEEDS:-}; do
+  feeds+=(-v "${f#*=}:/feeds/${f%%=*}:ro")
+done
 exec docker run --rm "${tty[@]}" \
   -v "$openwrt:/src" \
+  "${feeds[@]}" \
   -v "$HOME/.cache/openwrt-ccache:/home/builder/.ccache" \
   -e CCACHE_DIR=/home/builder/.ccache \
   "$image" "$@"
