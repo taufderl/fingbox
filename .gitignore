@@ -1,0 +1,10 @@
+# eMMC dumps and build outputs: never commit
+captures/**/*.img
+captures/**/*.img.*
+captures/**/*.bin
+*.img
+*.img.xz
+*.img.gz
+build/
+out/
+.claude/worktrees/
