@@ -1,7 +1,7 @@
-# eMMC dumps and build outputs: never commit
-captures/**/*.img
-captures/**/*.img.*
-captures/**/*.bin
+# Raw captures stay local: serial logs contain device MACs, serial numbers and
+# network names; stock/ holds proprietary Domotz files; images are eMMC dumps.
+captures/*
+!captures/README.md
 *.img
 *.img.xz
 *.img.gz
