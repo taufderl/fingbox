@@ -12,7 +12,11 @@ button, Tailscale, LuCI and mitmproxy all verified on hardware.
   current `main`, and reword each commit to drop those trailers and add **your
   own** `Signed-off-by`, keeping one line that discloses AI assistance (OpenWrt
   policy). Then open the PR against `openwrt/openwrt`.
-  sign-off (done the same way for the Linux series).
+- **Script:** `scripts/openwrt-prep-pr.sh` (no args) rebases `fingbox` onto the
+  current `openwrt/main` on a new `fingbox-submit` branch and rewrites the
+  trailers (drops the Claude lines, adds your Signed-off-by + a disclosure
+  line). Then `git log -p upstream/main..fingbox-submit` to review, and
+  `scripts/openwrt-prep-pr.sh --push` / `--pr`.
 
 ## Linux kernel → upstream
 
