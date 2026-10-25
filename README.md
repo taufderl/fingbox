@@ -63,7 +63,9 @@ captures/   local only: logs, dumps and stock files are never committed
 ```
 
 The early notes (`docs/00`–`05`) assumed FEL recovery over micro-USB. That turned
-out to be wrong for this hardware; `findings.md` has the verified state.
+out to be wrong for this hardware; `findings.md` has the verified state,
+`docs/07-openwrt.md` the OpenWrt install, `docs/08-deployment.md` the live
+AP + transparent-proxy deployment, and `docs/NEXT-STEPS.md` what remains.
 
 ## Related work
 

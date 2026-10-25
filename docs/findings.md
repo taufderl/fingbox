@@ -45,6 +45,8 @@ capture in `captures/`.
 
 | 2026-10-24 | Wi-Fi AP | AP + STA concurrently on phy0 (same channel as the upstream AP). WPA2 client (phone) associated at −40 dBm, 72.2 Mbit/s MCS7 SGI both ways, DHCP lease from br-lan, internet via the Fingbox works | logread, iw |
 
+| 2026-10-25 | Deployment | Reconfigured live (no reflash) as a Wi-Fi AP "Fingbox" with eth0 WAN uplink and transparent mitmproxy on :8080 for AP clients; AP subnet 192.168.9.0/24, IPv4-only, QUIC blocked. Data partition p3 at /srv via fstab/block-mount. Remote cutover used a 5-min auto-revert. See `08-deployment.md` | ssh |
+
 Note on the DTB name: `sun8i-h3-domotz-fingbox-v2` suggests this unit is a
 **Fingbox v2** hardware revision, or that Domotz versioned the DT. Check the label
 on the case.
