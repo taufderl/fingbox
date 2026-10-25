@@ -12,7 +12,6 @@ button, Tailscale, LuCI and mitmproxy all verified on hardware.
   current `main`, and reword each commit to drop those trailers and add **your
   own** `Signed-off-by`, keeping one line that discloses AI assistance (OpenWrt
   policy). Then open the PR against `openwrt/openwrt`.
-- Ask Claude for a rebase script that strips the trailers and re-adds your
   sign-off (done the same way for the Linux series).
 
 ## Linux kernel → upstream
